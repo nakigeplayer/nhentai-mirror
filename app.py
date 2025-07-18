@@ -38,6 +38,8 @@ def ruta_personalizada(subpath):
         web_1=full_url
     )
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+import os
+
+port = int(os.environ.get("PORT", 8000))
+app.run(host="0.0.0.0", port=port)
+
