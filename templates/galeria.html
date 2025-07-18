@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Galería Escaneada</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background: #f4f4f4; padding: 20px; }
+        .galeria { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .item { background: white; padding: 10px; border: 1px solid #ccc; width: 220px; box-shadow: 2px 2px 4px #ddd; }
+        img { max-width: 100%; height: auto; }
+        .caption { margin-top: 5px; font-size: 14px; color: #333; }
+        a { font-size: 13px; color: #007acc; text-decoration: none; display: block; margin-top: 4px; }
+        .descargar { font-size: 13px; color: #28a745; text-decoration: none; display: block; margin-top: 4px; }
+        .descargar:hover { color: #218838; }
+        .paginacion { text-align: center; margin: 20px 0; }
+        .paginacion a { display: inline-block; margin: 0 6px; padding: 6px 12px; background: #fff; border: 1px solid #ccc; border-radius: 4px; color: #007acc; text-decoration: none; font-size: 14px; }
+        .paginacion a:hover { background: #e6f2ff; }
+        .busqueda { text-align: center; margin: 20px 0; }
+        .busqueda input[type="text"] {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .busqueda button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .busqueda button:hover {
+            background-color: #005fa3;
+        }
+    </style>
+</head>
+<body>
+    <h2>Escaneando link: {{web_1}}</h2>
+
+    <!-- 🔍 Barra de búsqueda -->
+    <div class="busqueda">
+        <input type="text" id="busqueda" placeholder="Barra de búsqueda" onkeydown="if(event.key==='Enter') buscar()">
+        <button onclick="buscar()">Buscar</button>
+    </div>
+
+    <!-- 🔼 Botones arriba -->
+    <div class="paginacion">
+        {% for boton in botones %}
+        <a href="{{boton.href}}">{{boton.nombre}}</a>
+        {% endfor %}
+    </div>
+
+    <div class="galeria">
+        {% for img in imagenes %}
+        <div class="item">
+            <img src="{{img.src}}">
+            <div class="caption">{{img.caption}}</div>
+            <a href="{{img.url_completa}}" target="_blank">Ver: {{img.combinacion}}</a>
+            <a class="descargar" href="https://naki-hdl.onrender.com/direct/dl1/{{img.combinacion}}" target="_blank">Descargar</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 🔽 Botones abajo -->
+    <div class="paginacion">
+        {% for boton in botones %}
+        <a href="{{boton.href}}">{{boton.nombre}}</a>
+        {% endfor %}
+    </div>
+
+    <script>
+        function buscar() {
+            const valor = document.getElementById("busqueda").value.trim();
+            if (valor) {
+                const query = encodeURIComponent(valor.replace(/\s+/g, '+'));
+                window.location.href = `/search/?q=${query}`;
+            }
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/tab.js') }}"></script>
+</body>
+</html>
+

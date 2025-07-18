@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Código {{code}}</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f0f0; padding: 20px; } 
+        h2 { text-align: center; }
+        .texto { white-space: pre-wrap; background: #fff; padding: 10px; border-radius: 6px; box-shadow: 2px 2px 4px #ccc; margin-bottom: 20px; }
+        .galeria { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .item { background: white; padding: 10px; border: 1px solid #ccc; width: 220px; box-shadow: 2px 2px 4px #ddd; text-align: center; }
+        img { max-width: 100%; height: auto; border-radius: 4px; }
+        .busqueda { text-align: center; margin: 20px 0; }
+        .busqueda input[type="text"] {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .busqueda button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .busqueda button:hover {
+            background-color: #005fa3;
+        }
+    </style>
+</head>
+<body>
+    <h2>Código {{code}}</h2>
+
+    <!-- 🔍 Barra de búsqueda -->
+    <div class="busqueda">
+        <input type="text" id="busqueda" placeholder="Barra de búsqueda" onkeydown="if(event.key==='Enter') buscar()">
+        <button onclick="buscar()">Buscar</button>
+    </div>
+
+    <div class="texto">{{texto|safe}}</div>
+    <div class="galeria">
+        {% for url in imagenes %}
+        <div class="item">
+            <img src="{{url}}" alt="Imagen">
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function buscar() {
+            const valor = document.getElementById("busqueda").value.trim();
+            if (valor) {
+                const query = encodeURIComponent(valor.replace(/\s+/g, '+'));
+                window.location.href = `/search/?q=${query}`;
+            }
+        }
+    </script>
+</body>
+</html>
+
