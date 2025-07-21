@@ -1,9 +1,9 @@
 from flask import Flask, render_template
-
 from flask import request
 from scraper import obtener_galeria
 from scraper_2 import obtener_detalles
 import os
+import request
 app = Flask(__name__)
 
 web_1 = "https://nhentai.net"  # 🔁 Cambia por tu URL real
