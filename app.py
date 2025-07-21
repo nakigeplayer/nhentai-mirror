@@ -21,6 +21,17 @@ def galeria():
         web_1=web_1
     )
 
+@app.route("/g/<code>")
+def detalles(code):
+    resultado = obtener_detalles(web_1, code)
+    return render_template(
+        "detalles.html",
+        texto=resultado["texto"],
+        imagenes=resultado["imagenes"],
+        code=code,
+        web_1=web_1
+    )
+
 @app.route("/local-img")
 def cargar_local_img():
     img_url = request.args.get("url")
