@@ -46,11 +46,13 @@ def cargar_local_img():
     try:
         res = requests.get(img_url, headers=headers, timeout=10)
         res.raise_for_status()
-        content_type = res.headers.get("Content-Type", "image/jpeg")
+        content_type = res.headers.get("Content-Type") or "image/jpeg"
         b64 = base64.b64encode(res.content).decode("utf-8")
-        return f"data:{content_type};base64,{b64}"
-    except:
+        return f"data:{content_type};base64,{b64}", 200
+    except Exception as e:
+        print("Error al generar imagen base64:", e)
         return "", 500
+
 
 @app.route("/<path:subpath>")
 def ruta_personalizada(subpath):
