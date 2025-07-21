@@ -29,7 +29,9 @@ def detalles(code):
         code=code,
         web_1=web_1
     )
-    
+
+from PIL import Image
+
 @app.route("/local-img")
 def cargar_local_img():
     img_url = request.args.get("url")
@@ -47,12 +49,20 @@ def cargar_local_img():
     try:
         res = requests.get(img_url, headers=headers, timeout=10)
         res.raise_for_status()
-        content_type = res.headers.get("Content-Type") or "image/jpeg"
-        b64 = base64.b64encode(res.content).decode("utf-8")
-        return f"data:{content_type};base64,{b64}", 200
+
+        # Abrimos y convertimos la imagen a PNG usando Pillow
+        original = Image.open(BytesIO(res.content)).convert("RGBA")
+        buffer = BytesIO()
+        original.save(buffer, format="PNG")
+        buffer.seek(0)
+        b64 = base64.b64encode(buffer.read()).decode("utf-8")
+
+        return f"data:image/png;base64,{b64}", 200
+
     except Exception as e:
-        print("Error al generar imagen base64:", e)
+        print("Error en conversión a PNG:", e)
         return "", 500
+
 
 
 @app.route("/<path:subpath>")
