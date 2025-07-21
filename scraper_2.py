@@ -16,21 +16,20 @@ def obtener_detalles(web_1, code):
     texto_final = []
     imagenes = []
 
-    # 📄 Parte 1: Textos, encabezados y etiquetas
+    # Parte 1: Textos, encabezados y etiquetas
     try:
         response = requests.get(base_url, headers=headers, timeout=10)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print("❌ Error al acceder:", e)
+        print("Error al acceder:", e)
         return {"texto": "", "imagenes": []}
 
     soup = BeautifulSoup(response.text, "html.parser")
     content = soup.find("div", id="content")
     if not content:
-        print("⚠️ No se encontró div#content")
+        print("No se encontró div#content")
         return {"texto": "", "imagenes": []}
 
-    # 🧠 Extraer texto de h1–h3 → span
     info = content.find("div", id="bigcontainer")
     if info:
         info_block = info.find("div", id="info-block")
@@ -48,8 +47,6 @@ def obtener_detalles(web_1, code):
                         if partes:
                             texto_final.append(" ".join(partes))
 
-    
-    # 🏷️ Extraer etiquetas por categoría con hipervínculos (excepto Pages y Uploaded)
     seccion_tags = content.find("section", id="tags")
     if seccion_tags:
         contenedores = seccion_tags.find_all("div", class_="tag-container")
@@ -58,21 +55,18 @@ def obtener_detalles(web_1, code):
             titulo = titulo_nodo.strip().rstrip(":") if titulo_nodo else "Sin título"
             texto_final.append(f"{titulo}:")
 
-            # 🔍 Caso especial: Pages (no hipervínculo)
             if titulo.lower() == "pages":
                 valor = cont.find("span", class_="tags")
                 if valor:
                     texto_final.append(valor.text.strip())
                 continue
 
-            # 🔍 Caso especial: Uploaded (extraer texto del <time>)
             if titulo.lower() == "uploaded":
                 time_tag = cont.find("time")
                 if time_tag and time_tag.text.strip():
                     texto_final.append(time_tag.text.strip())
                 continue
 
-            # 🔗 Caso general: etiquetas con hipervínculo
             tags_span = cont.find("span", class_="tags")
             if tags_span:
                 for a_tag in tags_span.find_all("a"):
@@ -82,17 +76,11 @@ def obtener_detalles(web_1, code):
                     if href and nombre:
                         texto_final.append(f'<a href="{href}">{nombre}</a>')
 
-
-
-    # 📷 Parte 2: contar thumbnails
     thumbnail_container = content.find("div", id="thumbnail-container")
     thumbs = thumbnail_container.find("div", class_="thumbs") if thumbnail_container else None
     thumb_divs = thumbs.find_all("div", class_="thumb-container") if thumbs else []
     total = len(thumb_divs)
-    #print(f"🖼️ {total} imágenes encontradas")
-    #print(texto_final)
 
-    # 🔁 Recorrer cada página individual
     for i in range(1, total + 1):
         pagina_url = f"{web_1}/g/{code}/{i}/"
         try:
@@ -113,20 +101,20 @@ def obtener_detalles(web_1, code):
                 src = img_tag.get("src")
                 img_url = urljoin(web_1, src)
 
-                # Descargar imagen y convertir a base64
-                try:
-                    img_response = requests.get(img_url, headers=headers, timeout=10)
-                    img_response.raise_for_status()
-                    content_type = img_response.headers.get("Content-Type", "image/jpeg")
-                    img_base64 = base64.b64encode(img_response.content).decode("utf-8")
-                    data_uri = f"data:{content_type};base64,{img_base64}"
-                    imagenes.append(data_uri)
-                except requests.exceptions.RequestException:
-                    continue
+                # Guardar el enlace directo de la imagen en la lista
+                imagenes.append(img_url)
+
+                # # try:
+                #     # img_response = requests.get(img_url, headers=headers, timeout=10)
+                #     # img_response.raise_for_status()
+                #     # content_type = img_response.headers.get("Content-Type", "image/jpeg")
+                #     # img_base64 = base64.b64encode(img_response.content).decode("utf-8")
+                #     # data_uri = f"data:{content_type};base64,{img_base64}"
+                #     # imagenes.append(data_uri)
+                # # except requests.exceptions.RequestException:
+                #     # continue
 
     return {
         "texto": "\n".join(texto_final),
         "imagenes": imagenes
     }
-
-
