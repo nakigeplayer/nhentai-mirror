@@ -1,14 +1,15 @@
-from flask import Flask, render_template
-from flask import request
+from flask import Flask, render_template, request
 from scraper import obtener_galeria
 from scraper_2 import obtener_detalles
 import os
 import requests
 import base64
 from io import BytesIO
+from PIL import Image
+
 app = Flask(__name__)
 
-web_1 = "https://nhentai.net"  # 🔁 Cambia por tu URL real
+web_1 = "https://nhentai.net"  # URL base
 
 @app.route("/")
 def galeria():
@@ -19,19 +20,6 @@ def galeria():
         botones=resultado["botones"],
         web_1=web_1
     )
-
-@app.route("/g/<code>")
-def detalles(code):
-    resultado = obtener_detalles(web_1, code)
-    return render_template(
-        "detalles.html",
-        texto=resultado["texto"],
-        imagenes=resultado["imagenes"],
-        code=code,
-        web_1=web_1
-    )
-
-from PIL import Image
 
 @app.route("/local-img")
 def cargar_local_img():
@@ -51,7 +39,7 @@ def cargar_local_img():
         res = requests.get(img_url, headers=headers, timeout=10)
         res.raise_for_status()
 
-        # Abrimos y convertimos la imagen a PNG usando Pillow
+        # Convertir a PNG con Pillow para máxima compatibilidad
         original = Image.open(BytesIO(res.content)).convert("RGBA")
         buffer = BytesIO()
         original.save(buffer, format="PNG")
@@ -64,18 +52,30 @@ def cargar_local_img():
         print("Error en conversión a PNG:", e)
         return "", 500
 
-
-
 @app.route("/<path:subpath>")
-def ruta_personalizada(subpath):
-    full_url = f"{web_1}{request.full_path}"
-    resultado = obtener_galeria(full_url)
-    return render_template(
-        "galeria.html",
-        imagenes=resultado["imagenes"],
-        botones=resultado["botones"],
-        web_1=full_url
-    )
+def ruta_general(subpath):
+    if subpath.startswith("g/"):
+        # Extraer el código y llamar a obtener_detalles
+        code = subpath.split("/")[1] if len(subpath.split("/")) > 1 else ""
+        resultado = obtener_detalles(web_1, code)
+        return render_template(
+            "detalles.html",
+            texto=resultado["texto"],
+            imagenes=resultado["imagenes"],
+            code=code,
+            web_1=web_1
+        )
+    else:
+        # Tratar como galería genérica
+        full_url = f"{web_1}/{subpath}"
+        resultado = obtener_galeria(full_url)
+        return render_template(
+            "galeria.html",
+            imagenes=resultado["imagenes"],
+            botones=resultado["botones"],
+            web_1=full_url
+        )
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
