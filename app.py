@@ -5,6 +5,7 @@ from scraper_2 import obtener_detalles
 import os
 import requests
 import base64
+from io import BytesIO
 app = Flask(__name__)
 
 web_1 = "https://nhentai.net"  # 🔁 Cambia por tu URL real
