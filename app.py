@@ -28,6 +28,29 @@ def detalles(code):
         code=code,
         web_1=web_1
     )
+    
+@app.route("/local-img")
+def cargar_local_img():
+    img_url = request.args.get("url")
+    if not img_url:
+        return "", 400
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/115.0.0.0 Safari/537.36"
+        )
+    }
+
+    try:
+        res = requests.get(img_url, headers=headers, timeout=10)
+        res.raise_for_status()
+        content_type = res.headers.get("Content-Type", "image/jpeg")
+        b64 = base64.b64encode(res.content).decode("utf-8")
+        return f"data:{content_type};base64,{b64}"
+    except:
+        return "", 500
 
 @app.route("/<path:subpath>")
 def ruta_personalizada(subpath):
@@ -39,7 +62,6 @@ def ruta_personalizada(subpath):
         botones=resultado["botones"],
         web_1=full_url
     )
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
